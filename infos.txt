@@ -3,3 +3,17 @@ GitHub code :
 
 Get Header with FasAPI :
     - Header Module from fastapi
+
+Add prefix and version to API in __init__.py in the main folder:
+    from fastapi import FasAPI
+    from src.books.routes import book_rooter
+
+    version = "v1"
+
+    app = FasAPI(
+        title = "API Title",
+        description = "API description",
+        version = version
+    )
+
+    app.include_router(book_rooter, prefix = f"/api/{version}/books", tags = ["books"])
