@@ -1,5 +1,10 @@
-GitHub code :
-    - https://github.com/jod35/fastapi-beyond-CRUD
+Tutorial :
+    GitHub code :
+        - https://github.com/jod35/fastapi-beyond-CRUD
+
+    YouTube :
+        - https://www.youtube.com/watch?v=TO4aQ3ghFOc
+        - 2:00:50
 
 Get Header with FasAPI :
     - Header Module from fastapi
