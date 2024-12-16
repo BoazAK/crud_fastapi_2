@@ -3,8 +3,8 @@ Tutorial :
         - https://github.com/jod35/fastapi-beyond-CRUD
 
     YouTube :
+        - https://www.youtube.com/watch?v=Uw4FPr-dD7Q&list=PLEt8Tae2spYnHy378vMlPH--87cfeh33P&ab_channel=SsaliJonathan
         - https://www.youtube.com/watch?v=TO4aQ3ghFOc
-        - 2:00:50
 
 Get Header with FasAPI :
     - Header Module from fastapi
@@ -22,3 +22,7 @@ Add prefix and version to API in __init__.py in the main folder:
     )
 
     app.include_router(book_rooter, prefix = f"/api/{version}/books", tags = ["books"])
+
+
+https://stackademic.com/blog/fastapi-role-base-access-control-with-jwt-9fa2922a088c
+https://dev.to/moadennagi/role-based-access-control-using-fastapi-h59
