@@ -353,3 +353,29 @@ async def get_headers(
     request_headers["Host"] = host
 
     return request_headers
+
+# Get all books
+@app.get("/books")
+async def get_all_books():
+    
+    return books
+
+# Create a book
+@app.post("/book")
+async def create_a_book() ->  dict :
+    pass
+
+# Get a book
+@app.get("/book/{book_id}")
+async def get_a_book(book_id : int) ->  dict :
+    pass
+
+# Update a book
+@app.put("/book/{book_id}")
+async def update_a_book(book_id : int) ->  dict :
+    pass
+
+# Get a book
+@app.delete("/book/{book_id}")
+async def delete_a_book(book_id : int) ->  dict :
+    pass
