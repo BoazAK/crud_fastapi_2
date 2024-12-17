@@ -4,4 +4,4 @@ FastAPI for CRUD API creation.
 
 ## To Do
 
-- [ ] hjhj
+- [ ] How to take only one parameter

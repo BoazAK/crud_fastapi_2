@@ -38,8 +38,7 @@ async def greet_path_query(name : str, age : int) -> dict :
         "age" : age
     }
 
-# Use path parameter and URL query and make one optional
-# Path parameter optional
+# Use two URL queries and make one optional
 @app.get("/greet_path_optional")
 async def greet_path_optional(
     name : Optional[str] = "User",
