@@ -1,4 +1,5 @@
 from fastapi import APIRouter
+from src.config import ENV
 
 root_router = APIRouter(
     tags = ["API Home"]
@@ -9,5 +10,6 @@ root_router = APIRouter(
 async def home():
     return {
         "status" : "OK",
-        "message" : "Server running"
+        "message" : "Server running",
+        "environment" : ENV
     }
