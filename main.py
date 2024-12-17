@@ -1,5 +1,5 @@
-from fastapi import FastAPI, Header
-from typing import Optional
+from fastapi import FastAPI, Header, status
+from typing import Optional, List
 from pydantic import BaseModel
 
 app = FastAPI()
@@ -277,6 +277,16 @@ books = [
   }
 ]
 
+# Books Base Model Class
+class Book(BaseModel):
+    id: int
+    title: str
+    author: str
+    publisher: str
+    published_date: str
+    page_count: int
+    language: str
+
 # Root Path
 @app.get("/")
 async def home():
@@ -354,16 +364,25 @@ async def get_headers(
 
     return request_headers
 
+
+##########################################
+"""
+CRUD actions on Books
+"""
 # Get all books
-@app.get("/books")
+@app.get("/books", response_model = List[Book])
 async def get_all_books():
-    
+
     return books
 
 # Create a book
-@app.post("/book")
-async def create_a_book() ->  dict :
-    pass
+@app.post("/book", status_code = status.HTTP_201_CREATED)
+async def create_a_book(book_data : Book) ->  dict :
+    new_book = book_data.model_dump()
+
+    books.append(new_book)
+
+    return new_book
 
 # Get a book
 @app.get("/book/{book_id}")
@@ -379,3 +398,5 @@ async def update_a_book(book_id : int) ->  dict :
 @app.delete("/book/{book_id}")
 async def delete_a_book(book_id : int) ->  dict :
     pass
+
+##########################################
