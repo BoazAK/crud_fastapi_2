@@ -1,4 +1,5 @@
 from fastapi import FastAPI, Header
+from typing import Optional
 
 app = FastAPI()
 
@@ -25,7 +26,29 @@ async def greet_name(name : str) -> dict :
 async def greet_name_query(name : str) -> dict :
     return {
         "status" : "OK",
-        "message" : f"Hello {name.capitalize()}"
+        "message" : f"Hello {name.title()}"
+    }
+
+# Use path parameter and URL query
+@app.get("/greet_path_query/{name}")
+async def greet_path_query(name : str, age : int) -> dict :
+    return {
+        "status" : "OK",
+        "message" : f"Hello {name.title()}",
+        "age" : age
+    }
+
+# Use path parameter and URL query and make one optional
+# Path parameter optional
+@app.get("/greet_path_optional")
+async def greet_path_optional(
+    name : Optional[str] = "User",
+    age : int = 0
+    ) -> dict :
+    return {
+        "status" : "OK",
+        "message" : f"Hello {name.title()}",
+        "age" : age
     }
 
 # Get Headers
