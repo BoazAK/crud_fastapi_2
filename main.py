@@ -1,4 +1,5 @@
 from fastapi import FastAPI, Header, status
+from fastapi.exceptions import HTTPException
 from typing import Optional, List
 from pydantic import BaseModel
 
@@ -287,6 +288,14 @@ class Book(BaseModel):
     page_count: int
     language: str
 
+# Books Update Model Class
+class BookUpdateModel(BaseModel):
+    title: str
+    author: str
+    publisher: str
+    page_count: int
+    language: str
+
 # Root Path
 @app.get("/")
 async def home():
@@ -387,7 +396,14 @@ async def create_a_book(book_data : Book) ->  dict :
 # Get a book
 @app.get("/book/{book_id}")
 async def get_a_book(book_id : int) ->  dict :
-    pass
+    for book in books :
+        if book["id"] == book_id :
+            return book
+        
+    raise HTTPException(
+        status_code = status.HTTP_404_NOT_FOUND,
+        detail = "Book Not Found"
+    )
 
 # Update a book
 @app.put("/book/{book_id}")
