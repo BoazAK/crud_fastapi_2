@@ -406,9 +406,22 @@ async def get_a_book(book_id : int) ->  dict :
     )
 
 # Update a book
-@app.put("/book/{book_id}")
-async def update_a_book(book_id : int) ->  dict :
-    pass
+@app.patch("/book/{book_id}")
+async def update_a_book(book_id : int, book_update_data : BookUpdateModel) ->  dict :
+    for book in books :
+        if book["id"] == book_id :
+            book["title"] = book_update_data.title
+            book["publisher"] = book_update_data.publisher
+            book["page_count"] = book_update_data.page_count
+            book["language"] = book_update_data.language
+
+            return book
+        
+    raise HTTPException(
+        status_code = status.HTTP_404_NOT_FOUND,
+        detail = "Book Not Found"
+    )
+    
 
 # Get a book
 @app.delete("/book/{book_id}")
