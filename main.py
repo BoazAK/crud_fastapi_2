@@ -10,6 +10,15 @@ async def home():
         "message" : "Server running"
     }
 
+# Input through URL
+# Great user by input
+@app.get("/greet/{name}")
+async def greet_name(name : str) -> dict :
+    return {
+        "status" : "OK",
+        "message" : f"Hello {name.capitalize()}"
+    }
+
 # Get Headers
 @app.get("/get_headers", status_code = 200)
 async def get_headers(
