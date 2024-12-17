@@ -10,10 +10,19 @@ async def home():
         "message" : "Server running"
     }
 
-# Input through URL
+# Input through URL PATH
 # Great user by input
 @app.get("/greet/{name}")
 async def greet_name(name : str) -> dict :
+    return {
+        "status" : "OK",
+        "message" : f"Hello {name.capitalize()}"
+    }
+
+# Input through query parameter
+# Great user by input
+@app.get("/greet_query")
+async def greet_name_query(name : str) -> dict :
     return {
         "status" : "OK",
         "message" : f"Hello {name.capitalize()}"
