@@ -123,14 +123,14 @@ async def get_unpublished_books(limit : int = 10, order_by : str = "created_at")
         )
 
 # Soft Delete of a Book
-@dynamic_book_router.patch("/delete/{id}", response_description = "Delete a book")
+@dynamic_book_router.patch("/delete/{id}", status_code = status.HTTP_204_NO_CONTENT, response_description = "Delete a book")
 async def delete_a_book(id : str) :
         
     try :
         
         book = await book_services.delete_a_book(id)
 
-        return book
+        return None
     
     except Exception as e :
 
@@ -199,7 +199,7 @@ async def update_book(id : str, book_data : Book) :
         )
     
 # Hard Delete a book
-@dynamic_book_router.delete("/hard_delete/{id}", response_description = "Hard Delete book")
+@dynamic_book_router.delete("/hard_delete/{id}", status_code = status.HTTP_204_NO_CONTENT, response_description = "Hard Delete book")
 async def hard_delete_book(id : str) :
     
     try :
