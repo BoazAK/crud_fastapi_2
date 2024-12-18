@@ -7,7 +7,7 @@ root_router = APIRouter(
 
 # Root Path
 @root_router.get("/")
-async def home():
+async def home() :
     return {
         "status" : "OK",
         "message" : "Server running",

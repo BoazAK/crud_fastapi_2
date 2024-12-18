@@ -1,7 +1,7 @@
 from pydantic import BaseModel
 
 # Books Base Model Class
-class Book(BaseModel):
+class Book(BaseModel) :
     id: int
     title: str
     author: str
@@ -11,7 +11,7 @@ class Book(BaseModel):
     language: str
 
 # Books Update Model Class
-class BookUpdateModel(BaseModel):
+class BookUpdateModel(BaseModel) :
     title: str
     author: str
     publisher: str

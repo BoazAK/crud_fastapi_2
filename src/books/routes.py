@@ -6,12 +6,12 @@ from src.books.book_data import books
 from src.books.schemas import Book, BookUpdateModel
 
 book_router = APIRouter(
-    tags = ["CRUD on Book"]
+    tags = ["CRUD on Book without DataBase"]
 )
 
 # Get all books
 @book_router.get("/", response_model = List[Book])
-async def get_all_books():
+async def get_all_books() :
 
     return books
 

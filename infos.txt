@@ -38,6 +38,9 @@ PyJWT to generate and verify the JWT tokens in Python
 Pydantic BaseSettings module
     - pip install pydantic-settings
 
+Motor library
+    pip install motor
+
 Run the server with Uvicorn
     uvicorn api.main:app --reload
 

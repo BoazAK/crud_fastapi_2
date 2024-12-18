@@ -61,7 +61,7 @@ async def get_headers(
     content_type: str = Header(None),
     user_agent: str = Header(None),
     host: str = Header(None)
-):
+) :
 
     request_headers = {}
 
