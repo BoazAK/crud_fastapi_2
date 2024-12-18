@@ -1,12 +1,8 @@
 from fastapi import APIRouter, status
 from fastapi.exceptions import HTTPException
 from typing import List
-from fastapi.encoders import jsonable_encoder
-from datetime import datetime, timezone
 
 from src.dynamic_books.schemas import Book, BookResponse, BookUpdateModel
-from src.config import db
-
 from src.dynamic_books.services import BookServices
 
 book_services = BookServices
