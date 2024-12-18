@@ -5,6 +5,7 @@ from src.home.routes import root_router
 from src.books.routes import book_router
 from src.web_basics.routes import web_basics_router
 from src.dynamic_books.routes import dynamic_book_router
+from src.user.routes import user_router
 
 @asynccontextmanager
 async def life_span(app:FastAPI) :
@@ -27,3 +28,4 @@ app.include_router(root_router)
 app.include_router(web_basics_router, prefix=f"/api/{version}/web_basics")
 app.include_router(book_router, prefix = f"/api/{version}/books")
 app.include_router(dynamic_book_router, prefix = f"/api/{version}/dynamic_books")
+app.include_router(user_router, prefix = f"/api/{version}/user")

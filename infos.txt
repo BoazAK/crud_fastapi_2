@@ -41,6 +41,18 @@ Pydantic BaseSettings module
 Motor library
     pip install motor
 
+Pydantic Email validator
+    pip install "pydantic[email]"
+
+Password hash library
+    pip install "passlib[bcrypt]"
+
+FastAPI Email sender module
+    pip install fastapi-mail
+
+PyJWT to generate and verify the JWT tokens in Python
+    pip install pyjwt
+
 Run the server with Uvicorn
     uvicorn api.main:app --reload
 

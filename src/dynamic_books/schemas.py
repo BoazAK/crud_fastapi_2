@@ -5,7 +5,7 @@ from pydantic import BaseModel, Field
 
 # Books Base Model Class
 class Book(BaseModel):
-    id: str = Field(default_factory = lambda: uuid4().hex, alias = "_id")
+    id : str = Field(default_factory = lambda : uuid4().hex, alias = "_id")
     title : str = Field(...)
     description : str = Field(...)
     author_name : str = Field(...)
@@ -17,7 +17,7 @@ class Book(BaseModel):
     class Config :
         allowed_population_by_field_name = True
         arbitrary_types_allowed = True
-        json_encoders = {ObjectId: str}
+        json_encoders = {ObjectId : str}
         json_schema_extra = {
             "example" : {
                 "title" : "The title of the book",
@@ -32,7 +32,7 @@ class Book(BaseModel):
 
 # Books Response Model Class
 class BookResponse(BaseModel):
-    id: str = Field(default_factory = lambda: uuid4().hex, alias = "_id")
+    id : str = Field(default_factory = lambda : uuid4().hex, alias = "_id")
     title : str = Field(...)
     description : str = Field(...)
     author_name : str = Field(...)
@@ -52,7 +52,7 @@ class BookResponse(BaseModel):
     class Config :
         allowed_population_by_field_name = True
         arbitrary_types_allowed = True
-        json_encoders = {ObjectId: str}
+        json_encoders = {ObjectId : str}
         json_schema_extra = {
             "example" : {
                 "title" : "The title of the book",
@@ -72,11 +72,3 @@ class BookResponse(BaseModel):
                 "deleted_at" : "The date when the book was deleted, if applicable (optional) on the platform"
             }
         }
-
-# Books Update Model Class
-class BookUpdateModel(BaseModel):
-    title: str
-    author: str
-    publisher: str
-    page_count: int
-    language: str
