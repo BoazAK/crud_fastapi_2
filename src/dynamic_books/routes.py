@@ -209,8 +209,8 @@ async def hard_delete_book(id : str) :
     try :
 
         book = await book_services.hard_delete_book(id)
-        
-        return book
+
+        return None
 
     except Exception as e :
 
