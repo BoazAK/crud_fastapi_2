@@ -98,14 +98,7 @@ class BookServices :
             
         if book is not None :
 
-            if book["status"] == False :
-
-                raise HTTPException(
-                    status_code = status.HTTP_304_NOT_MODIFIED,
-                    detail = "The Book is already published"
-                )
-            
-            elif book["status"] == True :
+            if book["status"] == True :
 
                 try :
 
@@ -150,7 +143,7 @@ class BookServices :
 
             raise HTTPException(
                 status_code = status.HTTP_404_NOT_FOUND,
-                detail = "The Book with this ID not found"
+                detail = "The Book with this ID not found or The Book is already published"
             )
         
     # Get all unpublished books limit to 10 per page and order by created date by user
