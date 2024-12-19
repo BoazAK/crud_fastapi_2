@@ -151,6 +151,7 @@ class Token(BaseModel) :
     
 class TokenData(BaseModel) :
     id : str
+    email : EmailStr
 
 class PasswordReset(BaseModel) :
     email : EmailStr = Field(...)

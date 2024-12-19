@@ -1,18 +1,21 @@
-from fastapi import APIRouter, status
+from fastapi import APIRouter, Depends, status
 from fastapi.exceptions import HTTPException
 from typing import List
 
 from src.dynamic_books.schemas import Book, BookResponse
 from src.dynamic_books.services import BookServices
 
+from src.user.dependencies import AccessTokenBearer
+
 book_services = BookServices
+access_token_bearer = AccessTokenBearer()
 dynamic_book_router = APIRouter(
     tags = ["CRUD on Book with DataBase"]
 )
 
 # Get all books (published and un published) limit to 10 per page and order by created date
 @dynamic_book_router.get("", response_description = "Get books", response_model = List[BookResponse])
-async def get_all_books(limit : int = 10, order_by : str = "created_at") :
+async def get_all_books(limit : int = 10, order_by : str = "created_at", user_details = Depends(access_token_bearer)) :
 
     try :
 
