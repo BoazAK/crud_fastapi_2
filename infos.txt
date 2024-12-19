@@ -53,6 +53,12 @@ FastAPI Email sender module
 PyJWT to generate and verify the JWT tokens in Python
     pip install pyjwt
 
+Redis
+    pip install "redis[hiredis]"
+
+    Install redis on the machine before use it. I did it with Docker
+        - docker run --name redis -p 6379:6379 -d redis
+
 Run the server with Uvicorn
     uvicorn api.main:app --reload
 
@@ -65,3 +71,13 @@ Run the server with Uvicorn
     - Run in pro mode
         export ENVIRONMENT=prod && uvicorn src.main:app --reload
         ENVIRONMENT=prod uvicorn app.main:app --host 0.0.0.0 --port 8000 (To Test)
+
+Docker
+    - Build and run in detached mode
+        docker-compose up -d --build
+
+    - Read logs
+        docker-compose logs
+
+    - Stop and delete containers
+        docker-compose down

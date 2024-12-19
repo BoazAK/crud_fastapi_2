@@ -1,4 +1,5 @@
 from typing import Annotated
+import uuid
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 import jwt
@@ -34,6 +35,8 @@ def create_access_token(payload: dict, timestamp: int = None, refresh: bool = Fa
         )
 
     to_encode.update({"exp": expiration_time})
+    
+    to_encode["jti"] = str(uuid.uuid4())
 
     to_encode["refresh"] = refresh
 

@@ -24,17 +24,20 @@ URL = os.getenv("DB_URI")
 ENV = os.getenv(f"{prefix}ENV")
 DB_COLLECTION = os.getenv(f"{prefix}DB_COLLECTION")
 
-SECRET_KEY = os.getenv(f"{prefix}SECRET_KEY")
-ALGORITHM = os.getenv(f"{prefix}ALGORITHM")
-ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv(f"{prefix}ACCESS_TOKEN_EXPIRE_MINUTES"))
+SECRET_KEY = os.getenv("SECRET_KEY")
+ALGORITHM = os.getenv("ALGORITHM")
+ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES"))
 
 
-MAIL_USERNAME = os.getenv(f"{prefix}MAIL_USERNAME")
-MAIL_PASSWORD = os.getenv(f"{prefix}MAIL_PASSWORD")
-MAIL_FROM = os.getenv(f"{prefix}MAIL_FROM")
-MAIL_PORT = os.getenv(f"{prefix}MAIL_PORT")
-MAIL_SERVER = os.getenv(f"{prefix}MAIL_SERVER")
-MAIL_FROM_NAME = os.getenv(f"{prefix}MAIL_FROM_NAME")
+REDIS_HOST = os.getenv("REDIS_HOST")
+REDIS_PORT = os.getenv("REDIS_PORT")
+
+MAIL_USERNAME = os.getenv("MAIL_USERNAME")
+MAIL_PASSWORD = os.getenv("MAIL_PASSWORD")
+MAIL_FROM = os.getenv("MAIL_FROM")
+MAIL_PORT = os.getenv("MAIL_PORT")
+MAIL_SERVER = os.getenv("MAIL_SERVER")
+MAIL_FROM_NAME = os.getenv("MAIL_FROM_NAME")
 
 # Connection to MongoDB database
 client = motor.motor_asyncio.AsyncIOMotorClient(URL)
