@@ -7,6 +7,7 @@ from fastapi.responses import JSONResponse
 import secrets
 
 from src.user import utils
+from src.user.dependencies import RefreshTokenBearer
 from src.user.schemas import NewPassword, PasswordReset, User, UserResponse
 from src.user.send_email import (
     password_changed,
@@ -348,3 +349,22 @@ async def user_login(user_credentials: OAuth2PasswordRequestForm = Depends()):
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Internal server error: {str(e)}",
         )
+
+
+@user_router.get("/refresh_token")
+async def get_new_access_token(token_details: dict = Depends(RefreshTokenBearer())):
+
+    expiry_timestamp = token_details["exp"]
+
+    print(token_details)
+
+    if datetime.fromtimestamp(expiry_timestamp) > datetime.now():
+        new_access_token = create_access_token(
+            {"id": token_details["id"], "email": token_details["email"]}
+        )
+
+        return JSONResponse(content={"access_token": new_access_token})
+
+    raise HTTPException(
+        status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid or expired token"
+    )
