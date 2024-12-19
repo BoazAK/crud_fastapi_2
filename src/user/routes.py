@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.encoders import jsonable_encoder
 from datetime import datetime
 from fastapi.security import OAuth2PasswordRequestForm
+from fastapi.responses import JSONResponse
 
 import secrets
 
@@ -270,20 +271,30 @@ async def user_login(user_credentials: OAuth2PasswordRequestForm = Depends()) :
                 # Change data in JSON
                 json_timestamp = jsonable_encoder(timestamp)
                 json_user_login_status = jsonable_encoder(user_login_status)
-                user_info = jsonable_encoder(user_info)
+                user_info = jsonable_encoder(user)
 
                 # Merging JSON objects
                 user_info = {**user_info, **json_timestamp, **json_user_login_status}
 
                 # Create the access token
-                access_token = create_access_token({"id": user["_id"]})
+                access_token = create_access_token({"id" : user["_id"], "email" : user["email"]})
+
+                refresh_token = create_access_token({"id" : user["_id"], "email" : user["email"]}, refresh = True, timestamp = 1440)
 
                 update_user = await db["users"].update_one({"_id" : user["_id"]}, {"$set" : user})
 
-                return {
-                    "access_token": access_token,
-                    "token_type": "bearer"
-                }
+                return JSONResponse(
+                    content = {
+                        "message" : "Login successful",
+                        "token_type" : "bearer",
+                        "access_token" : access_token,
+                        "refresh_token" : refresh_token,
+                        "user" : {
+                            "id" : user["_id"],
+                            "email" : user["email"]
+                        }
+                    }
+                )
             
             else :
                 raise HTTPException(

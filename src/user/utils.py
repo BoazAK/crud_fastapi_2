@@ -19,7 +19,7 @@ def verify_password(plain_password, hashed_password):
 def get_password_hash(password):
     return pwd_context.hash(password)
 
-def create_access_token(payload : dict, timestamp : int = None) :
+def create_access_token(payload : dict, timestamp : int = None, refresh : bool = False) :
     to_encode = payload.copy()
 
     if timestamp :
@@ -28,6 +28,8 @@ def create_access_token(payload : dict, timestamp : int = None) :
         expiration_time = datetime.now(timezone.utc) + timedelta(minutes = ACCESS_TOKEN_EXPIRE_MINUTES )
 
     to_encode.update({"exp" : expiration_time})
+
+    to_encode['refresh'] = refresh
 
     jwt_token = jwt.encode(to_encode, key = SECRET_KEY, algorithm = ALGORITHM)
 
