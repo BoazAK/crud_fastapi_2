@@ -7,11 +7,11 @@ import re
 
 class User(BaseModel):
     id : str = Field(default_factory = lambda : uuid4().hex, alias = "_id")
-    name : str = Field(...)
+    username : str = Field(...)
+    password: str = Field(...)
     email : EmailStr = Field(...)
-    password : str = Field(...)
 
-    @field_validator('name')
+    @field_validator('username')
     @classmethod
     def name_check(cls, v : str) -> str :
         # Name validation
@@ -53,7 +53,7 @@ class User(BaseModel):
         json_encoders = {ObjectId : str}
         json_schema_extra = {
             "example" : {
-                "name" : "John Doe",
+                "username" : "JohnDoe",
                 "email" : "jdoe@example.com",
                 "password" : "s3cRet_password"
             }
@@ -71,14 +71,10 @@ class User(BaseModel):
 
 class UserResponse(BaseModel):
     id : str = Field(default_factory = lambda : uuid4().hex, alias = "_id")
-    name : str = Field(...)
+    username : str = Field(...)
     email : EmailStr = Field(...)
-    created_at : Optional[str] = None
-    updated_at : Optional[str] = None
-    password_reset_request_at : Optional[str] = None
-    password_reset_at : Optional[str] = None
-    is_logged_in : bool
-    last_login_at : Optional[str] = None
+    first_name : Optional[str] = Field(None)
+    last_name : Optional[str] = Field(None)
     
     class Config :
         allowed_population_by_field_name = True
@@ -86,8 +82,56 @@ class UserResponse(BaseModel):
         json_encoders = {ObjectId : str}
         json_schema_extra = {
             "example" : {
-                "name" : "John Doe",
-                "email" : "jdoe@example.com"
+                "username" : "JohnDoe",
+                "email" : "jdoe@example.com",
+                "first_name": "The first name of the user (e.g. John).",
+                "last_name": "The last name of the user (e.g. Doe).",
+            }
+        }
+
+    @classmethod
+    def __get_pydantic_json_schema__(
+        cls, core_schema : CoreSchema, handler : GetJsonSchemaHandler
+    ) -> Dict[str, Any] :
+        json_schema = super().__get_pydantic_json_schema__(core_schema, handler)
+        json_schema = handler.resolve_ref_schema(json_schema)
+        json_schema.update(type = "string")
+        
+        return json_schema
+
+class UserResponseAdmin(BaseModel):
+    id : str = Field(default_factory = lambda : uuid4().hex, alias = "_id")
+    username : str = Field(...)
+    email : EmailStr = Field(...)
+    created_at : Optional[str] = None
+    is_verified : bool = Field(...)
+    verified_at : Optional[str] = None
+    first_name : str = Field(...)
+    last_name : str = Field(...)
+    password_reset_request_at : Optional[str] = None
+    password_reset_at : Optional[str] = None
+    is_logged_in : bool = Field(...)
+    last_login_at : Optional[str] = None
+    updated_at : Optional[str] = None
+    
+    class Config :
+        allowed_population_by_field_name = True
+        arbitrary_types_allowed = True
+        json_encoders = {ObjectId : str}
+        json_schema_extra = {
+            "example" : {
+                "username" : "JohnDoe",
+                "email" : "jdoe@example.com",
+                "created_at": "The date and time when the user's account was created.",
+                "is_verified": "Indicates whether the user's email has been verified.",
+                "verified_at": "The date and time when the user's email was verified.",
+                "first_name": "The first name of the user (e.g. John).",
+                "last_name": "The last name of the user (e.g. Doe).",
+                "password_reset_request_at": "The date and time when the user requested a password reset.",
+                "password_reset_at": "The date and time when the user's password was actually reset.",
+                "is_logged_in": "Indicates whether the user is currently logged in.",
+                "last_login_at": "The date and time when the user last logged in.",
+                "updated_at": "The date and time when the user's information was last updated."
             }
         }
 

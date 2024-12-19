@@ -16,7 +16,7 @@ user_router = APIRouter(
     tags = ["User Routes"]
 )
 
-@user_router.post("/registration", response_description = "Register a user", response_model = UserResponse)
+@user_router.post("/registration", response_description = "Register a user")
 async def user_registration(user_info: User) :
 
     try :
@@ -25,26 +25,28 @@ async def user_registration(user_info: User) :
         timestamp = {"created_at" : datetime.now()}
 
         user_login_status = {"is_logged_in"  : False}
+        user_verification_status = {"is_verified" : False}
 
         # Change data in JSON
         json_timestamp = jsonable_encoder(timestamp)
         json_user_login_status = jsonable_encoder(user_login_status)
+        json_user_verification_status = jsonable_encoder(user_verification_status)
         user_info = jsonable_encoder(user_info)
 
         # Merging JSON objects
-        user_info = {**user_info, **json_timestamp, **json_user_login_status}
+        user_info = {**user_info, **json_timestamp, **json_user_login_status, **json_user_verification_status}
 
         # Find user by username or by email
         user_found = await db["users"].find_one({
             "$or" : [
-                {"name" : user_info["name"]},
+                {"username" : user_info["username"]},
                 {"email" : user_info["email"]}
             ]
         })
 
         # Raise error if user exist
         if user_found :
-            if user_found.get("name") == user_info["name"] :
+            if user_found.get("username") == user_info["username"] :
                 raise HTTPException(
                     status_code = status.HTTP_409_CONFLICT,
                     detail = "Username is already taken"
@@ -65,13 +67,23 @@ async def user_registration(user_info: User) :
         new_user = await db["users"].insert_one(user_info)
         created_user = await db["users"].find_one({"_id" : new_user.inserted_id})
 
+        if user_info.get("first_name") and user_info.get("last_name") :
+
+            full_name = f'{user_info["first_name"]} {user_info["last_name"]}'
+        
+        else :
+
+            full_name = user_info["username"]
+
         # Send email to the user after registration
         await send_registration_email("Registratoin successful", user_info["email"], {
             "title" : "Registration Successfuly",
-            "name" : user_info["name"]
+            "name" : full_name
         })
         
-        return created_user
+        return {
+            "message" : "Account successfully created. A confirmation email has been sent."
+        }
     
     except Exception as e :
 
@@ -109,13 +121,21 @@ async def password_reset_request(user_email : PasswordReset) :
 
                 update_user = await db["users"].update_one({"_id" : user["_id"]}, {"$set" : user})
 
+                if user.get("first_name") and user.get("last_name") :
+
+                    full_name = f"{user['first_name']} {user['last_name']}"
+                
+                else :
+
+                    full_name = user["username"]
+
                 # Send Email to the user
                 await password_reset(
                     "Password reset",
                     user["email"],
                     {
                         "title" : "Password reset",
-                        "name" : user["name"],
+                        "name" : full_name,
                         "reset_link" : reset_link
                     }
                 )
@@ -144,7 +164,7 @@ async def password_reset_request(user_email : PasswordReset) :
             detail = f"Internal server error: {str(e)}"
         )
     
-@user_router.patch("/reset_password", response_description = "Password reset", response_model = UserResponse)
+@user_router.patch("/reset_password", response_description = "Password reset")
 async def reset_a_password(token : str, new_password : NewPassword) :
     
     try :
@@ -186,6 +206,14 @@ async def reset_a_password(token : str, new_password : NewPassword) :
 
                     # On line link for login
                     # login_link = f"https://domain.name/login"
+
+                    if user.get("first_name") and user.get("last_name") :
+
+                        full_name = f"{user['first_name']} {user['last_name']}"
+                    
+                    else :
+
+                        full_name = user["username"]
                     
                     # Send email to the user after password reset
                     await password_changed(
@@ -193,12 +221,10 @@ async def reset_a_password(token : str, new_password : NewPassword) :
                         user["email"],
                         {
                             "title" : "Password changed",
-                            "name" : user["name"],
+                            "name" : full_name,
                             "login_link" : login_link
                         }
                     )
-
-                    return updated_user
 
         # If nothing is provided, take the existing user
         existing_user = await db["users"].find_one({"_id" : user["_id"]})
@@ -227,8 +253,8 @@ async def user_login(user_credentials: OAuth2PasswordRequestForm = Depends()) :
         
         # Find one user by username or by email
         user = await db["users"].find_one({
-            "$or": [
-                {"name": user_credentials.username},
+            "$or" : [
+                {"username": user_credentials.username},
                 {"email": user_credentials.username}
             ]
         })
