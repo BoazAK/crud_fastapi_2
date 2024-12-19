@@ -58,8 +58,10 @@ Run the server with Uvicorn
 
     - Run in dev mode
         export ENVIRONMENT= && uvicorn src.main:app --reload
+
     - Run in test mode
         export ENVIRONMENT=test && uvicorn src.main:app --reload
+        
     - Run in pro mode
         export ENVIRONMENT=prod && uvicorn src.main:app --reload
         ENVIRONMENT=prod uvicorn app.main:app --host 0.0.0.0 --port 8000 (To Test)
