@@ -10,6 +10,19 @@ Articles on how to create role based user :
     - https://stackademic.com/blog/fastapi-role-base-access-control-with-jwt-9fa2922a088c
     - https://dev.to/moadennagi/role-based-access-control-using-fastapi-h59
 
+Users roles :
+    - Admins :
+        - Add users
+        - Change roles
+        - CRUD on users
+        - Book submissions
+        - CRUD on reviews
+        - Revoking access
+    - Users :
+        - CRUD on their own book submissions
+        - CRUD on their own reviews
+        - CRUD on their own accounts
+
 MongoDB Connector
     pip install pymongo
     pip install "pymongo[srv]" # Optional
