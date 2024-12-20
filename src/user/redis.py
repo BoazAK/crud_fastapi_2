@@ -1,9 +1,9 @@
-from redis import asyncio as aioredis
+import redis.asyncio as aioredis
 from fastapi import status
 from fastapi.exceptions import HTTPException
 from src.config import REDIS_PORT, REDIS_HOST
 
-JTI_EXPIRE = 3600
+JTI_EXPIRY = 3600
 
 try:
     token_blocklist = aioredis.StrictRedis(host=REDIS_HOST, port=REDIS_PORT, db=0)
@@ -19,7 +19,7 @@ except aioredis.ConnectionError as e:
     )
 
 async def add_jti_to_blocklist(jti: str) -> None:
-    await token_blocklist.set(name=jti, value="", exp=JTI_EXPIRE)
+    await token_blocklist.set(name=jti, value="", ex=JTI_EXPIRY)
 
 
 async def token_in_blocklist(jti: str) -> bool:

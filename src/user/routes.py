@@ -357,8 +357,6 @@ async def get_new_access_token(token_details: dict = Depends(RefreshTokenBearer(
 
     expiry_timestamp = token_details["exp"]
 
-    print(token_details)
-
     if datetime.fromtimestamp(expiry_timestamp) > datetime.now():
         new_access_token = create_access_token(
             {"id": token_details["id"], "email": token_details["email"]}
@@ -373,13 +371,9 @@ async def get_new_access_token(token_details: dict = Depends(RefreshTokenBearer(
 @user_router.get("/logout")
 async def revoke_token(token_details : dict = Depends(AccessTokenBearer())) :
      
-     print("#" * 20)
-     print(token_details)
-     print("#" * 20)
-     
-    #  jti = token_details["jti"]
+     jti = token_details["jti"]
 
-    #  await add_jti_to_blocklist(jti)
+     await add_jti_to_blocklist(jti)
 
      return JSONResponse(
          status_code = status.HTTP_200_OK,

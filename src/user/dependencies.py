@@ -47,7 +47,7 @@ class TokenBearer(HTTPBearer):
 
         token_data = decode_token(token)
 
-        return True if token_data is not None else False
+        return token_data is not None
 
     def verify_token_data(self, token_data):
         raise NotImplementedError("Please Override this method in child classes")
