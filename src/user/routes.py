@@ -353,7 +353,9 @@ async def user_login(user_credentials: OAuth2PasswordRequestForm = Depends()):
 
 
 @user_router.get("/refresh_token")
-async def get_new_access_token(token_details: dict = Depends(RefreshTokenBearer())):
+async def get_new_access_token(
+    token_details: dict = Depends(RefreshTokenBearer())
+):
 
     expiry_timestamp = token_details["exp"]
 
@@ -367,7 +369,16 @@ async def get_new_access_token(token_details: dict = Depends(RefreshTokenBearer(
             timestamp=172800,
         )
 
-        return JSONResponse(content={"access_token": new_access_token, "refresh_token": new_refresh_token})
+        jti = token_details["jti"]
+
+        await add_jti_to_blocklist(jti)
+
+        return JSONResponse(
+            content={
+                "access_token": new_access_token,
+                "refresh_token": new_refresh_token
+            }
+        )
 
     raise HTTPException(
         status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid or expired token"
