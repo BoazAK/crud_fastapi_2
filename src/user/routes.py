@@ -354,8 +354,11 @@ async def user_login(user_credentials: OAuth2PasswordRequestForm = Depends()):
 
 @user_router.get("/refresh_token")
 async def get_new_access_token(
-    token_details: dict = Depends(RefreshTokenBearer())
+    token_details: dict = Depends(RefreshTokenBearer()),
+    current_user=Depends(get_current_user)
 ):
+
+    print(current_user)
 
     expiry_timestamp = token_details["exp"]
 
@@ -369,9 +372,9 @@ async def get_new_access_token(
             timestamp=172800,
         )
 
-        jti = token_details["jti"]
+        # jti = token_details["jti"]
 
-        await add_jti_to_blocklist(jti)
+        # await add_jti_to_blocklist(jti)
 
         return JSONResponse(
             content={

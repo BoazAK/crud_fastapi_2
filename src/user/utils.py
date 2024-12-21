@@ -81,7 +81,8 @@ async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):
     # current_user.pop("password")
 
     # Return only the _id item not all user informations
-    return current_user.pop("_id")
+    # return current_user.pop("_id")
+    return current_user["_id"], current_user["email"]
 
 
 def decode_token(token: str) -> dict:
