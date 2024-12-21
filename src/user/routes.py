@@ -407,7 +407,7 @@ async def get_new_access_token(
         )
 
 @user_router.get("/me")
-async def get_current_user(current_user=Depends(get_current_user), access_token: dict = Depends(AccessTokenBearer())):
+async def get_current_user_infos(current_user=Depends(get_current_user), access_token: dict = Depends(AccessTokenBearer())):
 
     return current_user
 
