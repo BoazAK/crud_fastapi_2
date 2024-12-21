@@ -309,7 +309,7 @@ async def user_login(user_credentials: OAuth2PasswordRequestForm = Depends()):
                 refresh_token = create_access_token(
                     {"id": user["_id"], "email": user["email"]},
                     refresh=True,
-                    timestamp=1440,
+                    timestamp=172800,
                 )
 
                 update_user = await db["users"].update_one(
@@ -361,23 +361,26 @@ async def get_new_access_token(token_details: dict = Depends(RefreshTokenBearer(
         new_access_token = create_access_token(
             {"id": token_details["id"], "email": token_details["email"]}
         )
+        new_refresh_token = create_access_token(
+            {"id": token_details["id"], "email": token_details["email"]},
+            refresh=True,
+            timestamp=172800,
+        )
 
-        return JSONResponse(content={"access_token": new_access_token})
+        return JSONResponse(content={"access_token": new_access_token, "refresh_token": new_refresh_token})
 
     raise HTTPException(
         status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid or expired token"
     )
 
+
 @user_router.get("/logout")
-async def revoke_token(token_details : dict = Depends(AccessTokenBearer())) :
-     
-     jti = token_details["jti"]
+async def revoke_token(token_details: dict = Depends(AccessTokenBearer())):
 
-     await add_jti_to_blocklist(jti)
+    jti = token_details["jti"]
 
-     return JSONResponse(
-         status_code = status.HTTP_200_OK,
-         content = {
-             "message" : "Logged out successfully"
-         }
-     )
+    await add_jti_to_blocklist(jti)
+
+    return JSONResponse(
+        status_code=status.HTTP_200_OK, content={"message": "Logged out successfully"}
+    )

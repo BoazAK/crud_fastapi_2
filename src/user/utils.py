@@ -77,7 +77,11 @@ async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):
     # Get current user
     current_user = await db["users"].find_one({"_id": current_user_id})
 
-    return current_user
+    # Delete password and it item before return current user
+    # current_user.pop("password")
+
+    # Return only the _id item not all user informations
+    return current_user.pop("_id")
 
 
 def decode_token(token: str) -> dict:

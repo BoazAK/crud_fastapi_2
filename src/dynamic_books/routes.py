@@ -2,16 +2,17 @@ from fastapi import APIRouter, Depends, status
 from fastapi.exceptions import HTTPException
 from typing import List
 
+from fastapi.responses import JSONResponse
+
 from src.dynamic_books.schemas import Book, BookResponse
 from src.dynamic_books.services import BookServices
 
 from src.user.dependencies import AccessTokenBearer
+from src.user.utils import get_current_user
 
 book_services = BookServices
 access_token_bearer = AccessTokenBearer()
-dynamic_book_router = APIRouter(
-    tags=["CRUD on Book with DataBase"]
-)
+dynamic_book_router = APIRouter(tags=["CRUD on Book with DataBase"])
 
 
 # Get all books (published and un published) limit to 10 per page and order by created date
@@ -22,15 +23,31 @@ async def get_all_books(
     limit: int = 10,
     order_by: str = "created_at",
     user_details=Depends(access_token_bearer),
+    current_user=Depends(get_current_user)
 ):
 
     try:
 
-        print(user_details)
-
         books = await book_services.get_all_books(limit, order_by)
 
-        return books
+        result = []
+
+        for book in books :
+
+            if current_user == book["publisher_user_id"] :
+
+                result.append(book)
+
+            else :
+
+                return JSONResponse(
+                    status_code = status.HTTP_200_OK,
+                    content = {
+                        "message" : "No book published by you"
+                    }
+                )
+            
+            return result
 
     except Exception as e:
 
@@ -50,10 +67,13 @@ async def get_all_books(
     response_model=BookResponse,
 )
 async def create_a_book(
-    book_data: Book, user_details=Depends(access_token_bearer)
+    book_data: Book,
+    user_details=Depends(access_token_bearer),
+    current_user=Depends(get_current_user)
 ) -> dict:
+
     try:
-        new_book = await book_services.create_a_book(book_data)
+        new_book = await book_services.create_a_book(book_data, current_user)
 
         return new_book
 

@@ -1,4 +1,4 @@
-from fastapi import status
+from fastapi import Depends, status
 from fastapi.exceptions import HTTPException
 from fastapi.encoders import jsonable_encoder
 from datetime import datetime, timezone
@@ -17,13 +17,13 @@ class BookServices:
         return books
 
     # Create a book
-    async def create_a_book(book_data: Book) -> dict:
+    async def create_a_book(book_data: Book, current_user : str) -> dict:
 
         new_book = jsonable_encoder(book_data)
 
         # Add additional informations
+        new_book["publisher_user_id"] = current_user["_id"]
         new_book["created_at"] = str(datetime.now(timezone.utc))
-        new_book["publisher_user_id"] = "John Doe"
         new_book["status"] = new_book["delete_status"] = False
 
         new_book = await db["books"].insert_one(new_book)
