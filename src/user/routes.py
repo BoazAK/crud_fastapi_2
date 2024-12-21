@@ -4,9 +4,8 @@ from datetime import datetime
 from fastapi.security import OAuth2PasswordRequestForm
 from fastapi.responses import JSONResponse
 
-import secrets
+import httpx, secrets
 
-from src.user import utils
 from src.user.dependencies import RefreshTokenBearer, AccessTokenBearer
 from src.user.schemas import NewPassword, PasswordReset, User, UserResponse
 from src.user.send_email import (
@@ -14,10 +13,10 @@ from src.user.send_email import (
     password_reset,
     send_registration_email,
 )
-from src.user.utils import create_access_token, get_current_user, get_password_hash
+from src.user.utils import create_access_token, get_current_user, get_password_hash, verify_password
 from src.user.redis import add_jti_to_blocklist
 
-from src.config import db
+from src.config import db, DOMAIN_NAME, PORT
 
 user_router = APIRouter(tags=["User Routes"])
 
@@ -125,10 +124,10 @@ async def password_reset_request(user_email: PasswordReset):
                 token = create_access_token({"id": user["_id"]}, 5)
 
                 # Local link for password reset
-                reset_link = f"http://127.0.0.1:8000/?token={token}"
+                reset_link = f"http://{DOMAIN_NAME}:{PORT}/?token={token}"
 
                 # On line link for password reset
-                # reset_link = f"https://domain.name/?token={token}"
+                # reset_link = f"https://{DOMAIN_NAME}/?token={token}"
 
                 timestamp = {"password_reset_request_at": datetime.today()}
 
@@ -223,10 +222,10 @@ async def reset_a_password(token: str, new_password: NewPassword):
                 if updated_user is not None:
 
                     # Local link for login
-                    login_link = f"http://127.0.0.1:8000/login"
+                    login_link = f"http://{DOMAIN_NAME}:{PORT}/login"
 
                     # On line link for login
-                    # login_link = f"https://domain.name/login"
+                    # login_link = f"https://{DOMAIN_NAME}/login"
 
                     if user.get("first_name") and user.get("last_name"):
 
@@ -286,7 +285,7 @@ async def user_login(user_credentials: OAuth2PasswordRequestForm = Depends()):
         try:
 
             # Validate user credentials and create access token
-            if user and utils.verify_password(
+            if user and verify_password(
                 user_credentials.password, user["password"]
             ):
 
@@ -354,39 +353,63 @@ async def user_login(user_credentials: OAuth2PasswordRequestForm = Depends()):
 
 @user_router.get("/refresh_token")
 async def get_new_access_token(
-    token_details: dict = Depends(RefreshTokenBearer()),
-    current_user=Depends(get_current_user)
+    token_details: dict = Depends(RefreshTokenBearer()), access_token : str = "Access Token"
 ):
+    
+    url = f"http://{DOMAIN_NAME}:{PORT}/api/v1/user/me"
 
-    print(current_user)
+    headers = {
+        'accept': 'application/json',
+        'Authorization': f'Bearer {str(access_token)}'
+    }
 
-    expiry_timestamp = token_details["exp"]
+    async with httpx.AsyncClient() as client:
+        response = await client.get(url, headers=headers)
 
-    if datetime.fromtimestamp(expiry_timestamp) > datetime.now():
-        new_access_token = create_access_token(
-            {"id": token_details["id"], "email": token_details["email"]}
+    if response.status_code == 200:
+        user_info = response.json()
+    else:
+        raise HTTPException(status_code=response.status_code, detail="Failed to fetch user info")
+
+    if (user_info["_id"] == token_details["id"]) and (user_info["email"] == token_details["email"]):
+
+        expiry_timestamp = token_details["exp"]
+
+        if datetime.fromtimestamp(expiry_timestamp) > datetime.now():
+            new_access_token = create_access_token(
+                {"id": token_details["id"], "email": token_details["email"]}
+            )
+            new_refresh_token = create_access_token(
+                {"id": token_details["id"], "email": token_details["email"]},
+                refresh=True,
+                timestamp=172800,
+            )
+
+            jti = token_details["jti"]
+
+            await add_jti_to_blocklist(jti)
+
+            return JSONResponse(
+                content={
+                    "access_token": new_access_token,
+                    "refresh_token": new_refresh_token
+                }
+            )
+
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid or expired token"
         )
-        new_refresh_token = create_access_token(
-            {"id": token_details["id"], "email": token_details["email"]},
-            refresh=True,
-            timestamp=172800,
+
+    else:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You are not authorized to perform this action"
         )
 
-        # jti = token_details["jti"]
+@user_router.get("/me")
+async def get_current_user(current_user=Depends(get_current_user), access_token: dict = Depends(AccessTokenBearer())):
 
-        # await add_jti_to_blocklist(jti)
-
-        return JSONResponse(
-            content={
-                "access_token": new_access_token,
-                "refresh_token": new_refresh_token
-            }
-        )
-
-    raise HTTPException(
-        status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid or expired token"
-    )
-
+    return current_user
 
 @user_router.get("/logout")
 async def revoke_token(token_details: dict = Depends(AccessTokenBearer())):

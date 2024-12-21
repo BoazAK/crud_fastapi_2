@@ -80,9 +80,11 @@ async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):
     # Delete password and it item before return current user
     # current_user.pop("password")
 
+    current_user = {key: value for key, value in current_user.items() if key != "password"}
+
     # Return only the _id item not all user informations
     # return current_user.pop("_id")
-    return current_user["_id"], current_user["email"]
+    return current_user
 
 
 def decode_token(token: str) -> dict:
@@ -98,3 +100,4 @@ def decode_token(token: str) -> dict:
         logging.exception(e)
 
         return None
+    

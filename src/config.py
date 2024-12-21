@@ -9,7 +9,7 @@ import motor.motor_asyncio
 load_dotenv()
 
 variable_name = "ENVIRONMENT"  # Replace with the name of the environment variable you want to access
-value = os.environ.get(variable_name)
+value = str(os.environ.get(variable_name))
 
 # Determine the prefix based on the value of 'value'
 if value.lower() == "prod":
@@ -23,6 +23,8 @@ else:
 URL = os.getenv("DB_URI")
 ENV = os.getenv(f"{prefix}ENV")
 DB_COLLECTION = os.getenv(f"{prefix}DB_COLLECTION")
+DOMAIN_NAME = os.getenv(f"{prefix}DOMAIN_NAME")
+PORT = os.getenv(f"{prefix}PORT")
 
 SECRET_KEY = os.getenv("SECRET_KEY")
 ALGORITHM = os.getenv("ALGORITHM")
