@@ -50,6 +50,14 @@ class BookResponse(BaseModel):
     updated_at: Optional[str] = None
     delete_status: bool
     deleted_at: Optional[str] = None
+    published_by_admin: Optional[str] = None
+    unpublished_by_admin: Optional[str] = None
+    deleted_by_admin: Optional[str] = None
+    updated_by_admin: Optional[str] = None
+    published_by_admin_at: Optional[str] = None
+    unpublished_by_admin_at: Optional[str] = None
+    deleted_by_admin_at: Optional[str] = None
+    updated_by_admin_at: Optional[str] = None
 
     class Config:
         allowed_population_by_field_name = True
@@ -72,5 +80,13 @@ class BookResponse(BaseModel):
                 "updated_at": "The date when the book record was last updated (optional) on the platform",
                 "delete_status": "Indicates whether the book record is marked for deletion on the platform",
                 "deleted_at": "The date when the book was deleted, if applicable (optional) on the platform",
+                "published_by_admin": "Indicates if the item has been published by an admin.",
+                "unpublished_by_admin": "Indicates if the item has been unpublished by an admin.",
+                "deleted_by_admin": "Indicates if the item has been deleted by an admin.",
+                "updated_by_admin": "Indicates if the item has been updated by an admin.",
+                "published_by_admin_at": "The timestamp when the item was published by an admin.",
+                "unpublished_by_admin_at": "The timestamp when the item was unpublished by an admin.",
+                "deleted_by_admin_at": "The timestamp when the item was deleted by an admin.",
+                "updated_by_admin_at": "The timestamp when the item was updated by an admin."
             }
         }

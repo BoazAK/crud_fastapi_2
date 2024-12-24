@@ -102,9 +102,9 @@ async def create_a_book(
     response_description="Publish a book",
     response_model=BookResponse,
     dependencies=[role_checker],
-    current_user=Depends(get_current_user),
 )
-async def publish_a_book(id: str, user_details=Depends(access_token_bearer)):
+async def publish_a_book(id: str, user_details=Depends(access_token_bearer),
+    current_user=Depends(get_current_user),):
 
     try:
 
@@ -133,6 +133,7 @@ async def get_all_published_books(
     limit: int = 10,
     order_by: str = "created_at",
     user_details=Depends(access_token_bearer),
+    current_user=Depends(get_current_user),
 ):
 
     try:
@@ -158,7 +159,8 @@ async def get_all_published_books(
     response_model=BookResponse,
     dependencies=[role_checker],
 )
-async def unpublish_a_book(id: str, user_details=Depends(access_token_bearer)):
+async def unpublish_a_book(id: str, user_details=Depends(access_token_bearer),
+    current_user=Depends(get_current_user),):
 
     try:
 
@@ -187,6 +189,7 @@ async def get_unpublished_books(
     limit: int = 10,
     order_by: str = "created_at",
     user_details=Depends(access_token_bearer),
+    current_user=Depends(get_current_user),
 ):
 
     try:
@@ -212,7 +215,8 @@ async def get_unpublished_books(
     response_description="Delete a book",
     dependencies=[role_checker],
 )
-async def delete_a_book(id: str, user_details=Depends(access_token_bearer)):
+async def delete_a_book(id: str, user_details=Depends(access_token_bearer),
+    current_user=Depends(get_current_user),):
 
     try:
 
@@ -241,6 +245,7 @@ async def get_deleted_books(
     limit: int = 10,
     order_by: str = "deleted_at",
     user_details=Depends(access_token_bearer),
+    current_user=Depends(get_current_user),
 ):
 
     try:
@@ -266,7 +271,8 @@ async def get_deleted_books(
     response_model=BookResponse,
     dependencies=[role_checker],
 )
-async def get_a_book(id: str, user_details=Depends(access_token_bearer)):
+async def get_a_book(id: str, user_details=Depends(access_token_bearer),
+    current_user=Depends(get_current_user),):
 
     try:
 
@@ -292,7 +298,8 @@ async def get_a_book(id: str, user_details=Depends(access_token_bearer)):
     dependencies=[role_checker],
 )
 async def update_book(
-    id: str, book_data: Book, user_details=Depends(access_token_bearer)
+    id: str, book_data: Book, user_details=Depends(access_token_bearer),
+    current_user=Depends(get_current_user),
 ):
 
     try:
