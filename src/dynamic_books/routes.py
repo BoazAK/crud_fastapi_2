@@ -102,6 +102,7 @@ async def create_a_book(
     response_description="Publish a book",
     response_model=BookResponse,
     dependencies=[role_checker],
+    current_user=Depends(get_current_user),
 )
 async def publish_a_book(id: str, user_details=Depends(access_token_bearer)):
 
