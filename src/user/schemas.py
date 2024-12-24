@@ -113,11 +113,12 @@ class UserResponseAdmin(BaseModel):
     id: str = Field(default_factory=lambda: uuid4().hex, alias="_id")
     username: str = Field(...)
     email: EmailStr = Field(...)
+    first_name: Optional[str] = Field(None)
+    last_name: Optional[str] = Field(None)
+    role: str = Field(...)
     created_at: Optional[str] = None
     is_verified: bool = Field(...)
     verified_at: Optional[str] = None
-    first_name: str = Field(...)
-    last_name: str = Field(...)
     password_reset_request_at: Optional[str] = None
     password_reset_at: Optional[str] = None
     is_logged_in: bool = Field(...)
@@ -132,6 +133,9 @@ class UserResponseAdmin(BaseModel):
             "example": {
                 "username": "JohnDoe",
                 "email": "jdoe@example.com",
+                "first_name": "The first name of the user (e.g. John).",
+                "last_name": "The last name of the user (e.g. Doe).",
+                "role": "The role of the user",
                 "created_at": "The date and time when the user's account was created.",
                 "is_verified": "Indicates whether the user's email has been verified.",
                 "verified_at": "The date and time when the user's email was verified.",

@@ -1,3 +1,4 @@
+from typing import List
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.encoders import jsonable_encoder
 from datetime import datetime
@@ -7,7 +8,7 @@ from fastapi.responses import JSONResponse
 import httpx, secrets
 
 from src.user.dependencies import RefreshTokenBearer, AccessTokenBearer, RoleChecker
-from src.user.schemas import NewPassword, PasswordReset, User, UserResponse
+from src.user.schemas import NewPassword, PasswordReset, User, UserResponse, UserResponseAdmin
 from src.user.send_email import (
     password_changed,
     password_reset,
@@ -271,7 +272,8 @@ async def reset_a_password(token: str, new_password: NewPassword):
         )
 
 
-@user_router.post("/user_login", status_code=status.HTTP_200_OK)
+@user_router.post("/user_login",
+    response_description="User login", status_code=status.HTTP_200_OK)
 async def user_login(user_credentials: OAuth2PasswordRequestForm = Depends()):
 
     try:
@@ -355,7 +357,8 @@ async def user_login(user_credentials: OAuth2PasswordRequestForm = Depends()):
         )
 
 
-@user_router.get("/refresh_token")
+@user_router.get("/refresh_token",
+    response_description="Refresh token")
 async def get_new_access_token(
     token_details: dict = Depends(RefreshTokenBearer()), access_token : str = "Access Token"
 ):
@@ -410,12 +413,14 @@ async def get_new_access_token(
             detail="You are not authorized to perform this action"
         )
 
-@user_router.get("/me")
+@user_router.get("/me",
+    response_description="Get my account details")
 async def get_current_user_infos(current_user=Depends(get_current_user), access_token: dict = Depends(AccessTokenBearer()), _: bool = Depends(role_checker)):
 
     return current_user
 
-@user_router.get("/logout")
+@user_router.get("/logout",
+    response_description="User log out")
 async def revoke_token(token_details: dict = Depends(AccessTokenBearer())):
 
     jti = token_details["jti"]
@@ -426,4 +431,57 @@ async def revoke_token(token_details: dict = Depends(AccessTokenBearer())):
         status_code=status.HTTP_200_OK, content={"message": "Logged out successfully"}
     )
 
-@user_router.get("/users")
+# Get all users
+@user_router.get("/users",
+    response_description="Get users",
+    response_model=List[UserResponseAdmin],
+    dependencies=[Depends(RoleChecker(["admin"]))])
+async def get_all_users(access_token = Depends(AccessTokenBearer()), limit: int = 10, order_by: str = "created_at"):
+
+    try:
+        users = await db["users"].find().sort(order_by, -1).to_list(limit)
+
+        if not users :
+            raise HTTPException(
+                status_code = status.HTTP_404_NOT_FOUND,
+                detail = "No users found."
+            )
+
+        return users
+
+    except Exception as e:
+
+        print(f"Error occurred: {e}")
+
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Internal server error: {str(e)}",
+        )
+
+
+# Get on user
+@user_router.get("/user/{id}",
+    response_description="Get one user",
+    response_model=UserResponseAdmin,
+    dependencies=[Depends(RoleChecker(["admin"]))])
+async def get_one_user(access_token = Depends(AccessTokenBearer()), id : str = "User ID"):
+
+    try:
+        user = await db["users"].find_one({"_id" : id})
+
+        if user is None :
+            raise HTTPException(
+                status_code = status.HTTP_404_NOT_FOUND,
+                detail = "No users found."
+            )
+
+        return user
+
+    except Exception as e:
+
+        print(f"Error occurred: {e}")
+
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Internal server error: {str(e)}",
+        )

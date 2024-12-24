@@ -20,5 +20,5 @@ FastAPI for CRUD API creation.
   - [ ] Get A Book (Admin or user)
   - [ ] Update Book (Admin or user. Admin can update a book for a user)
   - [ ] Hard Delete Book (Admin only)
-- [ ] Get all users (Admin only)
-- [ ] Get one user (Admin only)
+- [x] Get all users (Admin only)
+- [x] Get one user (Admin only)
