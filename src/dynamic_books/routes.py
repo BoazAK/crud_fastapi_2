@@ -38,8 +38,15 @@ async def get_all_books(
 
         if current_user["role"] == "admin":
 
-            return books
-        
+            if books:
+
+                return books
+
+            return JSONResponse(
+                status_code=status.HTTP_200_OK,
+                content={"message": "No book published yet"},
+            )
+
         elif current_user["role"] == "user":
 
             for book in books:
@@ -103,8 +110,11 @@ async def create_a_book(
     response_model=BookResponse,
     dependencies=[role_checker],
 )
-async def publish_a_book(id: str, user_details=Depends(access_token_bearer),
-    current_user=Depends(get_current_user),):
+async def publish_a_book(
+    id: str,
+    user_details=Depends(access_token_bearer),
+    current_user=Depends(get_current_user),
+):
 
     try:
 
@@ -144,23 +154,30 @@ async def get_all_published_books(
 
         if current_user["role"] == "admin":
 
-            return published_books
+            if published_books:
+
+                return published_books
+
+            return JSONResponse(
+                status_code=status.HTTP_200_OK,
+                content={"message": "No book published yet"},
+            )
 
         elif current_user["role"] == "user":
-            
+
             for book in published_books:
-            
+
                 if current_user == book["publisher_user_id"]:
 
                     result.append(book)
 
                 else:
-                    
+
                     return JSONResponse(
-                        status_code = status.HTTP_200_OK,
-                        content={"message": "No book published by you"}
+                        status_code=status.HTTP_200_OK,
+                        content={"message": "No book published by you"},
                     )
-                
+
                 return result
 
     except Exception as e:
@@ -180,8 +197,11 @@ async def get_all_published_books(
     response_model=BookResponse,
     dependencies=[role_checker],
 )
-async def unpublish_a_book(id: str, user_details=Depends(access_token_bearer),
-    current_user=Depends(get_current_user),):
+async def unpublish_a_book(
+    id: str,
+    user_details=Depends(access_token_bearer),
+    current_user=Depends(get_current_user),
+):
 
     try:
 
@@ -215,9 +235,30 @@ async def get_unpublished_books(
 
     try:
 
-        unpub_book = await book_services.get_unpublished_books(limit, order_by)
+        unpub_books = await book_services.get_unpublished_books(limit, order_by)
 
-        return unpub_book
+        result = []
+
+        if current_user["role"] == "admin":
+
+            return unpub_books
+
+        elif current_user["role"] == "user":
+
+            for book in unpub_books:
+
+                if current_user == book["publisher_user_id"]:
+
+                    result.append(book)
+
+                else:
+
+                    return JSONResponse(
+                        status_code=status.HTTP_200_OK,
+                        content={"message": "No book unpublished by you"},
+                    )
+
+                return result
 
     except Exception as e:
 
@@ -236,8 +277,11 @@ async def get_unpublished_books(
     response_description="Delete a book",
     dependencies=[role_checker],
 )
-async def delete_a_book(id: str, user_details=Depends(access_token_bearer),
-    current_user=Depends(get_current_user),):
+async def delete_a_book(
+    id: str,
+    user_details=Depends(access_token_bearer),
+    current_user=Depends(get_current_user),
+):
 
     try:
 
@@ -292,8 +336,11 @@ async def get_deleted_books(
     response_model=BookResponse,
     dependencies=[role_checker],
 )
-async def get_a_book(id: str, user_details=Depends(access_token_bearer),
-    current_user=Depends(get_current_user),):
+async def get_a_book(
+    id: str,
+    user_details=Depends(access_token_bearer),
+    current_user=Depends(get_current_user),
+):
 
     try:
 
@@ -319,7 +366,9 @@ async def get_a_book(id: str, user_details=Depends(access_token_bearer),
     dependencies=[role_checker],
 )
 async def update_book(
-    id: str, book_data: Book, user_details=Depends(access_token_bearer),
+    id: str,
+    book_data: Book,
+    user_details=Depends(access_token_bearer),
     current_user=Depends(get_current_user),
 ):
 
@@ -338,20 +387,28 @@ async def update_book(
             detail=f"Internal server error: {str(e)}",
         )
 
+
 # Get all books for one user
-@dynamic_book_router.get("/user_books/{id}",
+@dynamic_book_router.get(
+    "/user_books/{id}",
     response_description="Get one user",
     response_model=List[BookResponse],
-    dependencies=[Depends(RoleChecker(["admin"]))])
-async def get_user_books(access_token = Depends(AccessTokenBearer()), id : str = "User ID", limit: int = 10, order_by: str = "created_at"):
+    dependencies=[Depends(RoleChecker(["admin"]))],
+)
+async def get_user_books(
+    access_token=Depends(AccessTokenBearer()),
+    id: str = "User ID",
+    limit: int = 10,
+    order_by: str = "created_at",
+):
 
     try:
         books = await book_services.get_user_books(id, limit, order_by)
 
-        if not books :
+        if not books:
             raise HTTPException(
-                status_code = status.HTTP_404_NOT_FOUND,
-                detail = "No books found for this user."
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="No books found for this user.",
             )
 
         return books
@@ -364,6 +421,7 @@ async def get_user_books(access_token = Depends(AccessTokenBearer()), id : str =
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Internal server error: {str(e)}",
         )
+
 
 # Hard Delete a book
 @dynamic_book_router.delete(
