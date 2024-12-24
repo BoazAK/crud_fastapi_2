@@ -50,10 +50,10 @@ class BookResponse(BaseModel):
     updated_at: Optional[str] = None
     delete_status: bool
     deleted_at: Optional[str] = None
-    published_by_admin: Optional[str] = None
-    unpublished_by_admin: Optional[str] = None
-    deleted_by_admin: Optional[str] = None
-    updated_by_admin: Optional[str] = None
+    published_by_admin: Optional[bool] = False
+    unpublished_by_admin: Optional[bool] = False
+    deleted_by_admin: Optional[bool] = False
+    updated_by_admin: Optional[bool] = False
     published_by_admin_at: Optional[str] = None
     unpublished_by_admin_at: Optional[str] = None
     deleted_by_admin_at: Optional[str] = None

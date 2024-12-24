@@ -118,7 +118,7 @@ async def publish_a_book(
 
     try:
 
-        book = await book_services.publish_a_book(id)
+        book = await book_services.publish_a_book(id, current_user)
 
         return book
 
@@ -205,7 +205,7 @@ async def unpublish_a_book(
 
     try:
 
-        book = await book_services.unpublish_a_book(id)
+        book = await book_services.unpublish_a_book(id, current_user)
 
         return book
 
@@ -285,7 +285,7 @@ async def delete_a_book(
 
     try:
 
-        book = await book_services.delete_a_book(id)
+        book = await book_services.delete_a_book(id, current_user)
 
         return None
 
@@ -346,7 +346,16 @@ async def get_a_book(
 
         book = await book_services.get_a_book(id)
 
-        return book
+        if (current_user == book["publisher_user_id"]) or (current_user["role"] == "admin"):
+
+            return book
+        
+        else:
+
+            return JSONResponse(
+                status_code=status.HTTP_403_FORBIDDEN,
+                content={"message": "You are not authorized to perform this action"},
+            )
 
     except Exception as e:
 
@@ -374,7 +383,7 @@ async def update_book(
 
     try:
 
-        book = await book_services.update_book(id, book_data)
+        book = await book_services.update_book(id, book_data, current_user)
 
         return book
 
