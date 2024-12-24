@@ -7,23 +7,28 @@ from fastapi.responses import JSONResponse
 from src.dynamic_books.schemas import Book, BookResponse
 from src.dynamic_books.services import BookServices
 
-from src.user.dependencies import AccessTokenBearer
+from src.user.dependencies import AccessTokenBearer, RoleChecker
 from src.user.utils import get_current_user
 
 book_services = BookServices
 access_token_bearer = AccessTokenBearer()
+role_checker = Depends(RoleChecker(["admin", "user"]))
+
 dynamic_book_router = APIRouter(tags=["CRUD on Book with DataBase"])
 
 
 # Get all books (published and un published) limit to 10 per page and order by created date
 @dynamic_book_router.get(
-    "", response_description="Get books", response_model=List[BookResponse]
+    "",
+    response_description="Get books",
+    response_model=List[BookResponse],
+    dependencies=[Depends(RoleChecker(["admin"]))],
 )
 async def get_all_books(
     limit: int = 10,
     order_by: str = "created_at",
     user_details=Depends(access_token_bearer),
-    current_user=Depends(get_current_user)
+    current_user=Depends(get_current_user),
 ):
 
     try:
@@ -32,21 +37,19 @@ async def get_all_books(
 
         result = []
 
-        for book in books :
+        for book in books:
 
-            if current_user == book["publisher_user_id"] :
+            if current_user == book["publisher_user_id"]:
 
                 result.append(book)
 
-            else :
+            else:
 
                 return JSONResponse(
-                    status_code = status.HTTP_200_OK,
-                    content = {
-                        "message" : "No book published by you"
-                    }
+                    status_code=status.HTTP_200_OK,
+                    content={"message": "No book published by you"},
                 )
-            
+
             return result
 
     except Exception as e:
@@ -65,11 +68,12 @@ async def get_all_books(
     status_code=status.HTTP_201_CREATED,
     response_description="Create a Book",
     response_model=BookResponse,
+    dependencies=[role_checker],
 )
 async def create_a_book(
     book_data: Book,
     user_details=Depends(access_token_bearer),
-    current_user=Depends(get_current_user)
+    current_user=Depends(get_current_user),
 ) -> dict:
 
     try:
@@ -92,6 +96,7 @@ async def create_a_book(
     "/publish_book/{id}",
     response_description="Publish a book",
     response_model=BookResponse,
+    dependencies=[role_checker],
 )
 async def publish_a_book(id: str, user_details=Depends(access_token_bearer)):
 
@@ -116,6 +121,7 @@ async def publish_a_book(id: str, user_details=Depends(access_token_bearer)):
     "/published",
     response_description="Get published books",
     response_model=List[BookResponse],
+    dependencies=[role_checker],
 )
 async def get_all_published_books(
     limit: int = 10,
@@ -144,6 +150,7 @@ async def get_all_published_books(
     "/unpublish/{id}",
     response_description="Unpublish a book",
     response_model=BookResponse,
+    dependencies=[role_checker],
 )
 async def unpublish_a_book(id: str, user_details=Depends(access_token_bearer)):
 
@@ -168,6 +175,7 @@ async def unpublish_a_book(id: str, user_details=Depends(access_token_bearer)):
     "/unpublished",
     response_description="Get unpublished books",
     response_model=List[BookResponse],
+    dependencies=[role_checker],
 )
 async def get_unpublished_books(
     limit: int = 10,
@@ -196,6 +204,7 @@ async def get_unpublished_books(
     "/delete/{id}",
     status_code=status.HTTP_204_NO_CONTENT,
     response_description="Delete a book",
+    dependencies=[role_checker],
 )
 async def delete_a_book(id: str, user_details=Depends(access_token_bearer)):
 
@@ -220,6 +229,7 @@ async def delete_a_book(id: str, user_details=Depends(access_token_bearer)):
     "/all_deleted",
     response_description="Get deleted books",
     response_model=List[BookResponse],
+    dependencies=[Depends(RoleChecker(["admin"]))],
 )
 async def get_deleted_books(
     limit: int = 10,
@@ -245,7 +255,10 @@ async def get_deleted_books(
 
 # Get one book
 @dynamic_book_router.get(
-    "/{id}", response_description="Get a book", response_model=BookResponse
+    "/{id}",
+    response_description="Get a book",
+    response_model=BookResponse,
+    dependencies=[role_checker],
 )
 async def get_a_book(id: str, user_details=Depends(access_token_bearer)):
 
@@ -267,7 +280,10 @@ async def get_a_book(id: str, user_details=Depends(access_token_bearer)):
 
 # Update a book
 @dynamic_book_router.patch(
-    "/{id}", response_description="Update a book", response_model=BookResponse
+    "/{id}",
+    response_description="Update a book",
+    response_model=BookResponse,
+    dependencies=[role_checker],
 )
 async def update_book(
     id: str, book_data: Book, user_details=Depends(access_token_bearer)
@@ -294,6 +310,7 @@ async def update_book(
     "/hard_delete/{id}",
     status_code=status.HTTP_204_NO_CONTENT,
     response_description="Hard Delete book",
+    dependencies=[Depends(RoleChecker(["admin"]))],
 )
 async def hard_delete_book(id: str, user_details=Depends(access_token_bearer)):
 

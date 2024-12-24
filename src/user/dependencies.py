@@ -1,10 +1,11 @@
-from fastapi import Request, status
+from fastapi import Depends, Request, status
 from fastapi.exceptions import HTTPException
 from fastapi.security import HTTPBearer
 from fastapi.security.http import HTTPAuthorizationCredentials
-from typing import Optional
+from typing import Any, Optional, List
 
-from src.user.utils import decode_token
+from src.user.schemas import User
+from src.user.utils import decode_token, get_current_user
 from src.user.redis import token_in_blocklist
 
 
@@ -73,3 +74,19 @@ class RefreshTokenBearer(TokenBearer):
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="Please provide a refresh token",
             )
+           
+class RoleChecker:
+    def __init__(self, allowed_roles:List[str]) -> None:
+        
+        self.allwed_roles = allowed_roles
+
+    def __call__(self, current_user : User = Depends(get_current_user)) -> Any:
+        
+        if current_user["role"] in self.allwed_roles :
+            
+            return True
+        
+        raise HTTPException(
+            status_code = status.HTTP_403_FORBIDDEN,
+            detail = "You are not allowed to perform this action"
+        )

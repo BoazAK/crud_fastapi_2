@@ -6,7 +6,7 @@ from fastapi.responses import JSONResponse
 
 import httpx, secrets
 
-from src.user.dependencies import RefreshTokenBearer, AccessTokenBearer
+from src.user.dependencies import RefreshTokenBearer, AccessTokenBearer, RoleChecker
 from src.user.schemas import NewPassword, PasswordReset, User, UserResponse
 from src.user.send_email import (
     password_changed,
@@ -18,6 +18,8 @@ from src.user.redis import add_jti_to_blocklist
 
 from src.config import db, DOMAIN_NAME, PORT
 
+role_checker = RoleChecker(["admin", "user"]) 
+
 user_router = APIRouter(tags=["User Routes"])
 
 
@@ -28,14 +30,15 @@ async def user_registration(user_info: User):
 
         # Get current time
         timestamp = {"created_at": datetime.now()}
-
         user_login_status = {"is_logged_in": False}
         user_verification_status = {"is_verified": False}
+        user_role = {"role": "user"}
 
         # Change data in JSON
         json_timestamp = jsonable_encoder(timestamp)
         json_user_login_status = jsonable_encoder(user_login_status)
         json_user_verification_status = jsonable_encoder(user_verification_status)
+        json_user_role = jsonable_encoder(user_role)
         user_info = jsonable_encoder(user_info)
 
         # Merging JSON objects
@@ -44,6 +47,7 @@ async def user_registration(user_info: User):
             **json_timestamp,
             **json_user_login_status,
             **json_user_verification_status,
+            **json_user_role,
         }
 
         # Find user by username or by email
@@ -302,17 +306,17 @@ async def user_login(user_credentials: OAuth2PasswordRequestForm = Depends()):
 
                 # Create the access token
                 access_token = create_access_token(
-                    {"id": user["_id"], "email": user["email"]}
+                    {"id": user["_id"], "email": user["email"], "role":user["role"]}
                 )
 
                 refresh_token = create_access_token(
-                    {"id": user["_id"], "email": user["email"]},
+                    {"id": user["_id"], "email": user["email"], "role":user["role"]},
                     refresh=True,
                     timestamp=172800,
                 )
 
                 update_user = await db["users"].update_one(
-                    {"_id": user["_id"]}, {"$set": user}
+                    {"_id": user["_id"]}, {"$set": user_info}
                 )
 
                 return JSONResponse(
@@ -370,8 +374,8 @@ async def get_new_access_token(
         user_info = response.json()
     else:
         raise HTTPException(status_code=response.status_code, detail="Failed to fetch user info")
-
-    if (user_info["_id"] == token_details["id"]) and (user_info["email"] == token_details["email"]):
+    
+    if (user_info["is_logged_in"] == True) and (user_info["_id"] == token_details["id"]) and (user_info["email"] == token_details["email"]):
 
         expiry_timestamp = token_details["exp"]
 
@@ -407,7 +411,7 @@ async def get_new_access_token(
         )
 
 @user_router.get("/me")
-async def get_current_user_infos(current_user=Depends(get_current_user), access_token: dict = Depends(AccessTokenBearer())):
+async def get_current_user_infos(current_user=Depends(get_current_user), access_token: dict = Depends(AccessTokenBearer()), _: bool = Depends(role_checker)):
 
     return current_user
 

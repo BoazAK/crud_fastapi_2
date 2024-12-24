@@ -23,7 +23,7 @@ app = FastAPI(
     title="FastBOOK",
     description="Project to learn FastAPI by creating a book review web service",
     version=version,
-    lifespan=life_span,
+    # lifespan=life_span,
 )
 
 app.include_router(root_router)
