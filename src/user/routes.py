@@ -425,3 +425,5 @@ async def revoke_token(token_details: dict = Depends(AccessTokenBearer())):
     return JSONResponse(
         status_code=status.HTTP_200_OK, content={"message": "Logged out successfully"}
     )
+
+@user_router.get("/users")
