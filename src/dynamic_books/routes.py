@@ -32,25 +32,30 @@ async def get_all_books(
 ):
 
     try:
-
         books = await book_services.get_all_books(limit, order_by)
 
         result = []
 
-        for book in books:
+        if current_user["role"] == "admin":
 
-            if current_user == book["publisher_user_id"]:
+            return books
+        
+        elif current_user["role"] == "user":
 
-                result.append(book)
+            for book in books:
 
-            else:
+                if current_user == book["publisher_user_id"]:
 
-                return JSONResponse(
-                    status_code=status.HTTP_200_OK,
-                    content={"message": "No book published by you"},
-                )
+                    result.append(book)
 
-            return result
+                else:
+
+                    return JSONResponse(
+                        status_code=status.HTTP_200_OK,
+                        content={"message": "No book published by you"},
+                    )
+
+                return result
 
     except Exception as e:
 

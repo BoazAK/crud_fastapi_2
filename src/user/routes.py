@@ -23,7 +23,7 @@ role_checker = RoleChecker(["admin", "user"])
 
 user_router = APIRouter(tags=["User Routes"])
 
-
+# User registration or sign in
 @user_router.post("/registration", response_description="Register a user")
 async def user_registration(user_info: User):
 
@@ -112,7 +112,7 @@ async def user_registration(user_info: User):
             detail=f"Internal server error: {str(e)}",
         )
 
-
+# Request for password reset
 @user_router.post(
     "/password_reset_request", response_description="Password reset request"
 )
@@ -187,7 +187,7 @@ async def password_reset_request(user_email: PasswordReset):
             detail=f"Internal server error: {str(e)}",
         )
 
-
+# Reset password
 @user_router.patch("/reset_password", response_description="Password reset")
 async def reset_a_password(token: str, new_password: NewPassword):
 
@@ -271,7 +271,7 @@ async def reset_a_password(token: str, new_password: NewPassword):
             detail=f"Internal server error: {str(e)}",
         )
 
-
+# User login
 @user_router.post("/user_login",
     response_description="User login", status_code=status.HTTP_200_OK)
 async def user_login(user_credentials: OAuth2PasswordRequestForm = Depends()):
@@ -356,7 +356,7 @@ async def user_login(user_credentials: OAuth2PasswordRequestForm = Depends()):
             detail=f"Internal server error: {str(e)}",
         )
 
-
+# Get refresh token for current connected user
 @user_router.get("/refresh_token",
     response_description="Refresh token")
 async def get_new_access_token(
@@ -413,6 +413,7 @@ async def get_new_access_token(
             detail="You are not authorized to perform this action"
         )
 
+# Get current connected user
 @user_router.get("/me",
     response_description="Get my account details")
 async def get_current_user_infos(current_user=Depends(get_current_user), access_token: dict = Depends(AccessTokenBearer()), _: bool = Depends(role_checker)):
@@ -431,7 +432,7 @@ async def revoke_token(token_details: dict = Depends(AccessTokenBearer())):
         status_code=status.HTTP_200_OK, content={"message": "Logged out successfully"}
     )
 
-# Get all users
+# Get all users by admin
 @user_router.get("/users",
     response_description="Get users",
     response_model=List[UserResponseAdmin],
@@ -458,8 +459,7 @@ async def get_all_users(access_token = Depends(AccessTokenBearer()), limit: int 
             detail=f"Internal server error: {str(e)}",
         )
 
-
-# Get on user
+# Get on user by admin
 @user_router.get("/user/{id}",
     response_description="Get one user",
     response_model=UserResponseAdmin,
