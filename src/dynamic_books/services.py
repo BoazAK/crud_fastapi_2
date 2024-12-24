@@ -347,6 +347,28 @@ class BookServices:
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="The Book with this ID not found",
             )
+        
+    async def get_user_books(id, limit, order_by):
+
+        try:
+            books = await db["books"].find({"publisher_user_id": id}).sort(order_by, -1).to_list(limit)
+
+            if not books :
+                raise HTTPException(
+                    status_code = status.HTTP_404_NOT_FOUND,
+                    detail = "No books found for this user."
+                )
+
+            return books
+
+        except Exception as e:
+
+            print(f"Error occurred: {e}")
+
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"Internal server error: {str(e)}",
+            )
 
     # Hard Delete a book
     async def hard_delete_book(id: str):

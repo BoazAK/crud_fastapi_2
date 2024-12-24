@@ -140,7 +140,28 @@ async def get_all_published_books(
 
         published_books = await book_services.get_all_published_books(limit, order_by)
 
-        return published_books
+        result = []
+
+        if current_user["role"] == "admin":
+
+            return published_books
+
+        elif current_user["role"] == "user":
+            
+            for book in published_books:
+            
+                if current_user == book["publisher_user_id"]:
+
+                    result.append(book)
+
+                else:
+                    
+                    return JSONResponse(
+                        status_code = status.HTTP_200_OK,
+                        content={"message": "No book published by you"}
+                    )
+                
+                return result
 
     except Exception as e:
 
@@ -317,6 +338,32 @@ async def update_book(
             detail=f"Internal server error: {str(e)}",
         )
 
+# Get all books for one user
+@dynamic_book_router.get("/user_books/{id}",
+    response_description="Get one user",
+    response_model=List[BookResponse],
+    dependencies=[Depends(RoleChecker(["admin"]))])
+async def get_user_books(access_token = Depends(AccessTokenBearer()), id : str = "User ID", limit: int = 10, order_by: str = "created_at"):
+
+    try:
+        books = await book_services.get_user_books(id, limit, order_by)
+
+        if not books :
+            raise HTTPException(
+                status_code = status.HTTP_404_NOT_FOUND,
+                detail = "No books found for this user."
+            )
+
+        return books
+
+    except Exception as e:
+
+        print(f"Error occurred: {e}")
+
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Internal server error: {str(e)}",
+        )
 
 # Hard Delete a book
 @dynamic_book_router.delete(
