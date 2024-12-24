@@ -9,7 +9,7 @@ FastAPI for CRUD API creation.
 - [ ] Add verification email to user
 - [ ] Change verification date if yes
 - [ ] Add Roles check on books endpoints
-  - [ ] Get All Books (Admin only)
+  - [ ] Get All Books (Admin only but if user, get all not deleted book he created)
   - [ ] Create A Book (Admin or user. Admin can update a book for a user)
   - [ ] Publish A Book (Admin or user. Admin can update a book for a user)
   - [ ] Get All Published Books (Admin or user. Admin can update a book for a user)
